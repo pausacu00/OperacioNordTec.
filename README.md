@@ -1,52 +1,142 @@
-# Pausacu — Operació NordTec
-## Objectiu
-### Desplegar, protegir i monitorar la infrasestructura d'una empresa mitjançant tecnologies actual d'administració de sistemes
+
+# Operació Nord Tec
+ 
+**Autor:** Pau Simó Sánchez Cuervo
+**Grup classe:** ASIX1A
+ 
 ---
-## Estat del projecte
-Iniciat
-En Construcció
+ 
+## Índex
+ 
+- [Operació Nord Tec](#operació-nord-tec)
+  - [Índex](#índex)
+  - [1. Estat del projecte](#1-estat-del-projecte)
+    - [Fet](#fet)
+    - [Pendent](#pendent)
+  - [2. Arquitectura de xarxa](#2-arquitectura-de-xarxa)
+    - [Informació rellevant](#informació-rellevant)
+  - [3. Configuracions](#3-configuracions)
+    - [`ruta/del/fitxer-1.conf`](#rutadelfitxer-1conf)
+    - [`ruta/del/fitxer-2.conf`](#rutadelfitxer-2conf)
+  - [4. Incidències i solucions](#4-incidències-i-solucions)
+    - [Incidència 1: _títol breu_](#incidència-1-títol-breu)
+    - [Incidència 2: _títol breu_](#incidència-2-títol-breu)
+  - [5. Decisions tècniques](#5-decisions-tècniques)
+  - [6. Reflexions tècniques](#6-reflexions-tècniques)
 ---
-## Arquitectura
-Pendent de dissenyar
-
-## Pràctica de Markdown
-
-En esta práctica he repasado **Markdown** y *los comandos básicos de Git*.
-
-### Pasos para subir un cambio a GitHub
-
-1. Revisar los archivos modificados con `git status`.
-2. Preparar los cambios con `git add`.
-3. Crear un commit con `git commit`.
-4. Subir los cambios con `git push`.
-
-Lista de tareas:
-
-- [x] Crear o editar el README.
-- [x] Preparar los cambios.
-- [ ] Revisar el resultado en GitHub.
-
-Enlace: [GitHub](https://github.com/)
-
-Comandos de hoy:
-
-```bash
-git status
-git add README.md
-git commit -m "Completa la práctica de Markdown"
-git push
+ 
+## 1. Estat del projecte
+ 
+### Fet
+ 
+- [x] _Tasca completada 1_
+- [x] _Tasca completada 2_
+- [x] _Tasca completada 3_
+### Pendent
+ 
+- [ ] _Tasca pendent 1_
+- [ ] _Tasca pendent 2_
+- [ ] _Tasca pendent 3_
+[⬆ Tornar a l'índex](#índex)
+ 
+---
+ 
+## 2. Arquitectura de xarxa
+ 
+![Esquema de xarxa](img/esquema-xarxa.png)
+ 
+> Substitueix la ruta per la teva imatge (per exemple, una captura de Packet Tracer o un diagrama).
+ 
+### Informació rellevant
+ 
+| Dispositiu | Interfície | Adreça IP | Màscara | Gateway | Rol / Observacions |
+|------------|-----------|-----------|---------|---------|--------------------|
+| _Router_   | _Gi0/0_   | _x.x.x.x_ | _/24_   | —       | _Sortida a Internet_ |
+| _Switch_   | _VLAN 1_  | _x.x.x.x_ | _/24_   | _x.x.x.x_ | _Gestió_ |
+| _Servidor_ | _eth0_    | _x.x.x.x_ | _/24_   | _x.x.x.x_ | _Serveis_ |
+| _Client_   | _eth0_    | _DHCP_    | _/24_   | _x.x.x.x_ | _Equip d'usuari_ |
+ 
+- **Xarxa:** _x.x.x.0/24_
+- **Rang DHCP:** _x.x.x.x – x.x.x.x_
+- **DNS:** _x.x.x.x_
+- **VLANs (si n'hi ha):** _ID – nom – xarxa_
+[⬆ Tornar a l'índex](#índex)
+ 
+---
+ 
+## 3. Configuracions
+ 
+Explicació dels fitxers de configuració utilitzats al projecte.
+ 
+### `ruta/del/fitxer-1.conf`
+ 
+- **Per a què serveix:** _descripció breu_
+- **Paràmetres clau:**
+  - `parametre1`: _què fa_
+  - `parametre2`: _què fa_
+```conf
+# Exemple del contingut rellevant
+parametre1 = valor
+parametre2 = valor
 ```
-
-### Comandos Git
-
-| Comando | Qué hace |
-| --- | --- |
-| `git status` | Muestra el estado de los archivos del repositorio. |
-| `git add README.md` | Prepara el README para incluirlo en el próximo commit. |
-| `git commit -m "mensaje"` | Guarda los cambios preparados con un mensaje. |
-| `git push` | Sube los commits al repositorio remoto. |
-| `git pull` | Descarga e integra los cambios del repositorio remoto. |
-
-## Incidencias
-
-Hoy Git no se instalaba correctamente y no quedaba disponible desde la terminal. La causa probable era una instalación incompleta o que Git todavía no estuviera añadido al `PATH`. Se resolvió completando la instalación y comprobando que Git ya estaba accesible con `git --version`.
+ 
+### `ruta/del/fitxer-2.conf`
+ 
+- **Per a què serveix:** _descripció breu_
+- **Paràmetres clau:**
+  - `parametre1`: _què fa_
+```conf
+# Exemple del contingut rellevant
+```
+ 
+[⬆ Tornar a l'índex](#índex)
+ 
+---
+ 
+## 4. Incidències i solucions
+ 
+> Repeteix el bloc següent per a cada incidència.
+ 
+### Incidència 1: _títol breu_
+ 
+- **Missatge d'error exacte:**
+```text
+  Enganxa aquí l'error tal com apareix
+```
+- **Quan:** _fase del projecte i context (què estàvem fent)_
+- **Causa:** _per què passava_
+- **Solució:** _què vam fer per resoldre-ho_
+- **Detectada per:** @usuari
+### Incidència 2: _títol breu_
+ 
+- **Missatge d'error exacte:**
+```text
+  Enganxa aquí l'error tal com apareix
+```
+- **Quan:** _fase i context_
+- **Causa:** _per què passava_
+- **Solució:** _què vam fer_
+- **Detectada per:** @usuari
+[⬆ Tornar a l'índex](#índex)
+ 
+---
+ 
+## 5. Decisions tècniques
+ 
+| Decisió | Què hem triat | Per què | Alternatives considerades |
+|---------|---------------|---------|---------------------------|
+| _Tema 1_ | _Opció triada_ | _Motiu_ | _Altres opcions_ |
+| _Tema 2_ | _Opció triada_ | _Motiu_ | _Altres opcions_ |
+| _Tema 3_ | _Opció triada_ | _Motiu_ | _Altres opcions_ |
+ 
+[⬆ Tornar a l'índex](#índex)
+ 
+---
+ 
+## 6. Reflexions tècniques
+ 
+- **Què ha funcionat bé:** _..._
+- **Què faria diferent:** _..._
+- **Què he après:** _..._
+- **Possibles millores futures:** _..._
+[⬆ Tornar a l'índex](#índex)
