@@ -1,5 +1,3 @@
-<a id="inici"></a>
-
 # Operació Nord Tec
 
 **Autor:** Pau Simó Sánchez Cuervo
@@ -49,15 +47,15 @@ Aquest document s'actualitza durant el desenvolupament del projecte, no al final
 
 ### Fet
 
-- [x] _Tasca completada 1_
-- [x] _Tasca completada 2_
-- [x] _Tasca completada 3_
+- [x] Configuració de les interfícies de xarxa del firewall (netplan): enp1s0 i enp2s0 per DHCP; Kali, DMZ i LAN amb IP estàtica
+- [x] Reenviament de paquets IP activat (`net.ipv4.ip_forward`)
+- [x] Script `firewall.sh` creat i executat: NAT de sortida a Internet, aïllament de la LAN, publicació del servidor web i registre del tràfic descartat
 
 ### Pendent
 
-- [ ] _Tasca pendent 1_
-- [ ] _Tasca pendent 2_
-- [ ] _Tasca pendent 3_
+- [ ] Fer les regles del firewall persistents (`netfilter-persistent save`)
+- [ ] Verificar la connectivitat entre zones i la sortida a Internet des de la LAN
+- [ ] Afegir captures de pantalla i completar l'esquema de xarxa
 
 [⬆ Tornar a l'índex](#índex)
 
@@ -94,6 +92,7 @@ La xarxa està formada per quatre segments connectats a través del firewall, qu
 | Zona | Xarxa | Interfície del firewall | IP del firewall | Equips | Funció |
 |------|-------|-------------------------|-----------------|--------|--------|
 | Firewall (Internet) | 192.168.122.0/24 | enp1s0 | 192.168.122.241 (DHCP) | Firewall | Sortida a Internet |
+| Gestió | Per DHCP | enp2s0 | Per DHCP | Firewall | Administració remota (SSH) |
 | DMZ | 192.168.10.0/24 | enp4s0 | 192.168.10.1 | Servidor web | Serveis exposats |
 | LAN | 192.168.20.0/24 | enp5s0 | 192.168.20.1 | Clients | Xarxa interna d'usuaris |
 | Kali | 10.0.0.0/24 | enp3s0 | 10.0.0.1 | Kali Linux | Proves i auditoria |
@@ -104,7 +103,7 @@ El firewall és l'únic equip connectat a les quatre xarxes. La seva IP a cada s
 
 | Dispositiu | Zona | Adreça IP | Màscara | Gateway | Observacions |
 |------------|------|-----------|---------|---------|--------------|
-| Firewall | Totes | 192.168.122.241 (enp1s0, DHCP)<br>10.0.0.1 (enp3s0)<br>192.168.10.1 (enp4s0)<br>192.168.20.1 (enp5s0) | /24 | Per DHCP a enp1s0; cap a la resta | Ubuntu 24.04 LTS |
+| Firewall | Totes | 192.168.122.241 (enp1s0, DHCP)<br>DHCP (enp2s0)<br>10.0.0.1 (enp3s0)<br>192.168.10.1 (enp4s0)<br>192.168.20.1 (enp5s0) | /24 | Per DHCP a enp1s0 i enp2s0; cap a la resta | Ubuntu 24.04 LTS |
 | Servidor web | DMZ | 192.168.10.2 | /24 | 192.168.10.1 | Web (port 80) i OWASP Juice Shop (port 3000) |
 | Client LAN | LAN | 192.168.20.x | /24 | 192.168.20.1 | _..._ |
 | Kali Linux | Kali | 10.0.0.x | /24 | 10.0.0.1 | Equip d'auditoria |
@@ -115,15 +114,16 @@ El firewall és l'únic equip connectat a les quatre xarxes. La seva IP a cada s
 |----------------|--------|--------------|
 | Firewall → Totes les xarxes | Sí | Política OUTPUT en ACCEPT |
 | LAN → Internet | Sí | NAT (MASQUERADE) per enp1s0 |
-| DMZ → Internet | Sí | Obert; pendent de restringir a DNS i HTTP/HTTPS per a actualitzacions |
+| DMZ → Internet | Només DNS, HTTP i HTTPS | Per a actualitzacions; la resta de ports queda bloquejat |
 | LAN → DMZ | Sí | |
 | Kali → DMZ | Sí | |
 | Kali → LAN | No | La LAN no accepta connexions noves des d'altres zones |
 | DMZ → LAN | No | Bloquejat explícitament |
 | Internet → DMZ | Només port 80 | DNAT cap a 192.168.10.2 |
 | Kali → DMZ (per la IP del firewall, 10.0.0.1) | Ports 80 i 3000 | DNAT cap a 192.168.10.2 (web i OWASP Juice Shop) |
-| Kali → Firewall | Ping | ICMP echo-request, ara mateix acceptat des de qualsevol interfície |
+| Kali → Firewall | Ping | ICMP echo-request, només des de la interfície de Kali |
 | LAN → Firewall | SSH (port 22) | Administració remota |
+| Gestió (enp2s0) → Firewall | SSH (port 22) | Administració remota des de la interfície de gestió |
 
 ### Arquitectura de l'aplicació
 
@@ -140,17 +140,39 @@ _Afegeix aquí els components de l'aplicació SaaS de NordTec a mesura que es de
 
 Explicació dels fitxers de configuració utilitzats al projecte.
 
+### `/etc/sysctl.conf`
+
+- **Per a què serveix:** activa de manera permanent el reenviament de paquets IPv4. Sense això el firewall no enruta tràfic entre les xarxes.
+- **Paràmetre clau:**
+  - `net.ipv4.ip_forward`: amb valor `1` permet reenviar paquets entre interfícies.
+
+```conf
+net.ipv4.ip_forward=1
+```
+
+L'script `firewall.sh` també l'activa en calent (`sysctl -w`), però només fins al proper reinici.
+
 ### `/etc/netplan/60-nordtec.yaml`
 
-- **Per a què serveix:** assigna una IP estàtica a les interfícies internes del firewall (Kali, DMZ i LAN). La interfície d'Internet (enp1s0) rep l'adreça per DHCP des del fitxer netplan que ja existia.
+- **Per a què serveix:** configura les interfícies del firewall. enp1s0 i enp2s0 reben l'adreça per DHCP; les interfícies internes (Kali, DMZ i LAN) tenen IP estàtica.
 - **Paràmetres clau:**
-  - `addresses`: IP del firewall a cada xarxa; és el gateway dels equips d'aquella zona.
-  - Cap interfície interna porta `gateway`: només enp1s0 té sortida a Internet.
+  - `dhcp4: true`: l'adreça s'obté per DHCP.
+  - `route-metric`: prioritat de la ruta per defecte. enp1s0 (mètrica 100) és la preferida per sortir a Internet; enp2s0 (mètrica 200) queda com a reserva.
+  - `addresses`: IP del firewall a cada xarxa interna; és el gateway dels equips d'aquella zona.
+  - Cap interfície interna porta `gateway`.
 
 ```yaml
 network:
   version: 2
   ethernets:
+    enp1s0:
+      dhcp4: true
+      dhcp4-overrides:
+        route-metric: 100
+    enp2s0:
+      dhcp4: true
+      dhcp4-overrides:
+        route-metric: 200
     enp3s0:
       addresses: [10.0.0.1/24]
     enp4s0:
@@ -161,37 +183,50 @@ network:
 
 ### `firewall.sh` (regles iptables)
 
-- **Per a què serveix:** defineix la política de seguretat del firewall: NAT, aïllament entre zones, publicació de serveis i registre de tràfic descartat.
-- **Requisit previ:** reenviament de paquets activat (`net.ipv4.ip_forward=1`).
+- **Per a què serveix:** defineix la política de seguretat del firewall: NAT, aïllament entre zones, publicació de serveis i registre del tràfic descartat.
+- **Execució:** `sudo bash firewall.sh`
 - **Blocs principals:**
 
 | Bloc | Què fa |
 |------|--------|
-| Neteja i polítiques per defecte | Esborra regles anteriors; `INPUT` i `FORWARD` en DROP, `OUTPUT` en ACCEPT |
-| NAT de sortida | MASQUERADE de 192.168.10.0/24 i 192.168.20.0/24 per enp1s0 |
-| Tràfic de retorn | Accepta `ESTABLISHED,RELATED` a `INPUT` i `FORWARD`; descarta paquets `INVALID` |
-| Accés al firewall | Loopback, ping i SSH des de la LAN (enp5s0) |
-| Sortida a Internet | Permet que la LAN i la DMZ surtin per enp1s0 |
-| Publicació de serveis (DNAT) | Web (port 80) des d'Internet i des de Kali, i OWASP Juice Shop (port 3000) des de Kali, cap a 192.168.10.2 |
-| Aïllament de la LAN | Descarta connexions noves cap a 192.168.20.0/24; permet LAN → DMZ i Kali → DMZ; bloqueja DMZ → LAN |
-| Registre | `LOG` amb el prefix `IPTABLES-DROP: ` al final de `FORWARD` |
+| Variables | Defineix les interfícies (enp1s0 Internet, enp2s0 gestió, enp3s0 Kali, enp4s0 DMZ, enp5s0 LAN), les xarxes i la IP del servidor web, per canviar-ho tot en un sol lloc |
+| Reenviament i polítiques temporals | Activa `ip_forward` en calent i posa les polítiques en ACCEPT mentre s'apliquen les regles, per no perdre la sessió |
+| Neteja | `iptables -F`, `iptables -t nat -F` i `iptables -X` |
+| INPUT | Loopback; tràfic de retorn (`ESTABLISHED,RELATED`); descarta `INVALID`; respostes DHCP a enp1s0 i enp2s0; ping només des de Kali; SSH des de la LAN i des de la interfície de gestió |
+| NAT | MASQUERADE de la LAN i la DMZ per enp1s0; DNAT del port 80 des d'Internet i des de Kali (via 10.0.0.1), i del port 3000 (OWASP Juice Shop) des de Kali, cap a 192.168.10.2 |
+| FORWARD | Descarta `INVALID` i accepta el tràfic de retorn; LAN → Internet; DMZ → Internet només DNS, HTTP i HTTPS; LAN → DMZ; Kali → DMZ; Internet → servidor web (port 80) |
+| Aïllament de la LAN | Registra i descarta les connexions noves cap a 192.168.20.0/24 des de qualsevol zona |
+| Registre | `LOG` amb el prefix `IPTABLES-DROP: `, limitat a 5 per minut |
+| Polítiques per defecte | Al final: `INPUT` i `FORWARD` en DROP, `OUTPUT` en ACCEPT |
 
 ### Comandes utilitzades
 
 ```bash
-# Activar el reenviament de paquets (necessari perquè el firewall enruti)
-echo "net.ipv4.ip_forward=1" | sudo tee -a /etc/sysctl.conf
+# Reenviament de paquets permanent: descomentar net.ipv4.ip_forward=1
+sudo nano /etc/sysctl.conf
 sudo sysctl -p
+cat /proc/sys/net/ipv4/ip_forward
 
-# Aplicar la configuració de xarxa i comprovar les IP
+# Configuració de xarxa (netplan) i comprovació d'IP i rutes
+sudo nano /etc/netplan/60-nordtec.yaml
 sudo chmod 600 /etc/netplan/60-nordtec.yaml
 sudo netplan apply
 ip -br a
+ip route
 
-# Executar les regles del firewall i fer-les persistents
+# Aplicar les regles del firewall
 sudo bash firewall.sh
+
+# Comprovar les regles carregades
+sudo iptables -L -n -v --line-numbers
+sudo iptables -t nat -L -n -v
+
+# Fer les regles persistents
 sudo apt install iptables-persistent
 sudo netfilter-persistent save
+
+# Consultar el tràfic descartat
+sudo journalctl -k | grep IPTABLES-DROP
 ```
 
 ### Captures de pantalla
