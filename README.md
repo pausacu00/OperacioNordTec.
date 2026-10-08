@@ -15,6 +15,9 @@
     - [Pendent](#pendent)
   - [2. Arquitectura de xarxa](#2-arquitectura-de-xarxa)
     - [Informació rellevant](#informació-rellevant)
+    - [Segments de xarxa](#segments-de-xarxa)
+    - [Equips i adreces IP](#equips-i-adreces-ip)
+    - [Política de tràfic entre zones](#política-de-tràfic-entre-zones)
   - [3. Configuracions](#3-configuracions)
     - [`ruta/del/fitxer-1.conf`](#rutadelfitxer-1conf)
     - [`ruta/del/fitxer-2.conf`](#rutadelfitxer-2conf)
@@ -49,17 +52,43 @@
  
 ### Informació rellevant
  
-| Dispositiu | Interfície | Adreça IP | Màscara | Gateway | Rol / Observacions |
-|------------|-----------|-----------|---------|---------|--------------------|
-| _Router_   | _Gi0/0_   | _x.x.x.x_ | _/24_   | —       | _Sortida a Internet_ |
-| _Switch_   | _VLAN 1_  | _x.x.x.x_ | _/24_   | _x.x.x.x_ | _Gestió_ |
-| _Servidor_ | _eth0_    | _x.x.x.x_ | _/24_   | _x.x.x.x_ | _Serveis_ |
-| _Client_   | _eth0_    | _DHCP_    | _/24_   | _x.x.x.x_ | _Equip d'usuari_ |
+La xarxa està formada per quatre segments connectats a través del firewall, que és l'únic element amb accés a totes les xarxes:
  
-- **Xarxa:** _x.x.x.0/24_
-- **Rang DHCP:** _x.x.x.x – x.x.x.x_
-- **DNS:** _x.x.x.x_
-- **VLANs (si n'hi ha):** _ID – nom – xarxa_
+```text
+                      +----------------+
+        Xarxa Kali ---|                |--- DMZ
+                      |    FIREWALL    |
+        LAN ----------|                |--- (Xarxa del firewall / WAN)
+                      +----------------+
+```
+ 
+### Segments de xarxa
+ 
+| Zona | Xarxa | Interfície del firewall | IP del firewall | Equips | Funció |
+|------|-------|-------------------------|-----------------|--------|--------|
+| Firewall | _x.x.x.0/24_ | _..._ | _x.x.x.x_ | Firewall | Accés a totes les xarxes |
+| DMZ | _x.x.x.0/24_ | _..._ | _x.x.x.x_ | _Servidor(s)_ | Serveis exposats |
+| LAN | _x.x.x.0/24_ | _..._ | _x.x.x.x_ | _Clients_ | Xarxa interna d'usuaris |
+| Kali | _x.x.x.0/24_ | _..._ | _x.x.x.x_ | Kali Linux | Proves i auditoria |
+ 
+### Equips i adreces IP
+ 
+| Dispositiu | Zona | Adreça IP | Màscara | Gateway | Observacions |
+|------------|------|-----------|---------|---------|--------------|
+| _Firewall_ | Totes | _x.x.x.x_ | _/24_ | — | _..._ |
+| _Servidor DMZ_ | DMZ | _x.x.x.x_ | _/24_ | _x.x.x.x_ | _..._ |
+| _Client LAN_ | LAN | _x.x.x.x_ | _/24_ | _x.x.x.x_ | _..._ |
+| _Kali Linux_ | Kali | _x.x.x.x_ | _/24_ | _x.x.x.x_ | _..._ |
+ 
+### Política de tràfic entre zones
+ 
+| Origen → Destí | Permès | Observacions |
+|----------------|--------|--------------|
+| Firewall → Totes les xarxes | Sí | Accés complet |
+| LAN → DMZ | _..._ | _..._ |
+| Kali → DMZ / LAN | _..._ | _..._ |
+| DMZ → LAN | _..._ | _..._ |
+ 
 [⬆ Tornar a l'índex](#índex)
  
 ---
@@ -140,3 +169,4 @@ parametre2 = valor
 - **Què he après:** _..._
 - **Possibles millores futures:** _..._
 [⬆ Tornar a l'índex](#índex)
+ 
