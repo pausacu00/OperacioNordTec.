@@ -3,33 +3,47 @@
  
 **Autor:** Pau Simó Sánchez Cuervo
 **Grup classe:** ASIX1A
+**Empresa:** SecureSys Consulting
+**Client:** NordTec
+ 
+---
+ 
+## Context del projecte
+ 
+Som un equip d'administradors de sistemes de **SecureSys Consulting**, empresa especialitzada en desplegament i protecció d'infraestructures TIC. **NordTec**, una empresa tecnològica que acaba d'iniciar la seva activitat, ens ha contractat per construir tota la seva infraestructura informàtica des de zero.
+ 
+| Camp | Dada |
+|------|------|
+| Empresa | NordTec |
+| Plantilla | 25 treballadors |
+| Sector | Empresa tecnològica · serveis SaaS |
+| Ubicació | Barcelona |
+| Departament TIC | No en té |
+| Previsió | Creixement esperat durant els propers mesos |
+ 
+Aquest document s'actualitza durant el desenvolupament del projecte, no al final: cada sessió de treball acaba amb una actualització del repositori i commits descriptius.
  
 ---
  
 ## Índex
  
-- [Operació Nord Tec](#operació-nord-tec)
-  - [Índex](#índex)
-  - [1. Estat del projecte](#1-estat-del-projecte)
-    - [Fet](#fet)
-    - [Pendent](#pendent)
-  - [2. Arquitectura de xarxa](#2-arquitectura-de-xarxa)
-    - [Informació rellevant](#informació-rellevant)
-    - [Segments de xarxa](#segments-de-xarxa)
-    - [Equips i adreces IP](#equips-i-adreces-ip)
-    - [Política de tràfic entre zones](#política-de-tràfic-entre-zones)
-  - [3. Configuracions](#3-configuracions)
-    - [`ruta/del/fitxer-1.conf`](#rutadelfitxer-1conf)
-    - [`ruta/del/fitxer-2.conf`](#rutadelfitxer-2conf)
-  - [4. Incidències i solucions](#4-incidències-i-solucions)
-    - [Incidència 1: _títol breu_](#incidència-1-títol-breu)
-    - [Incidència 2: _títol breu_](#incidència-2-títol-breu)
-  - [5. Decisions tècniques](#5-decisions-tècniques)
-  - [6. Reflexions tècniques](#6-reflexions-tècniques)
+1. [Estat del projecte](#1-estat-del-projecte)
+2. [Arquitectura de xarxa](#2-arquitectura-de-xarxa)
+3. [Configuracions](#3-configuracions)
+4. [Incidències i solucions](#4-incidències-i-solucions)
+5. [Decisions tècniques](#5-decisions-tècniques)
+6. [Reflexions tècniques](#6-reflexions-tècniques)
 ---
  
 ## 1. Estat del projecte
  
+### Peticions del client
+ 
+#### Petició 1: Necessitem connexió a Internet
+ 
+- **Sol·licitant:** Marta Illa (NordTec)
+- **Resum:** els primers equips ja han arribat a l'oficina i cal que estiguin connectats en xarxa i puguin sortir a Internet. El client també demana que la configuració quedi ben ordenada i documentada, perquè preveu ampliar la xarxa aviat.
+- **Estat:** en curs
 ### Fet
  
 - [x] _Tasca completada 1_
@@ -89,6 +103,10 @@ La xarxa està formada per quatre segments connectats a través del firewall, qu
 | Kali → DMZ / LAN | _..._ | _..._ |
 | DMZ → LAN | _..._ | _..._ |
  
+### Arquitectura de l'aplicació
+ 
+_Descriu aquí els components de l'aplicació SaaS i en quina zona de la xarxa es desplega cada un._
+ 
 [⬆ Tornar a l'índex](#índex)
  
 ---
@@ -117,6 +135,19 @@ parametre2 = valor
 ```conf
 # Exemple del contingut rellevant
 ```
+ 
+### Comandes utilitzades
+ 
+```bash
+# Comanda 1: què fa i per què s'ha executat
+comanda --opcio
+```
+ 
+### Captures de pantalla
+ 
+![Descripció de la captura](img/captura-1.png)
+ 
+_Explica breument què es veu a la captura i a quina configuració correspon._
  
 [⬆ Tornar a l'índex](#índex)
  
@@ -169,4 +200,3 @@ parametre2 = valor
 - **Què he après:** _..._
 - **Possibles millores futures:** _..._
 [⬆ Tornar a l'índex](#índex)
- 
